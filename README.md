@@ -10,7 +10,7 @@ When he meets a lead he will collect basic profile information like name, mobile
 
 
 ## Scenario 2
-Since prospective borrowers are scattered all over the city and they are busy running their business. Hence it is vital that the FA is able to effectively manage his day. Some leads will show interest but they would ask the FA to call/meet later on a specific date / time / location. The FA has to capture these details so he can remember to follow-up later
+Prospective borrowers are scattered all over the city and they are busy running their business. Hence it is vital that the FA is able to effectively manage his day. Some leads will show interest but they would ask the FA to call/meet later on a specific date / time / location. The FA has to capture these details so he can remember to follow-up later
 
 **Task 2** - Enable reminders for follow-up tasks based on date, time and location
 
