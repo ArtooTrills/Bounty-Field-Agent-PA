@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">TaskReminder</string>
+    <string name="action_addreminder">AddReminder</string>
+    <string name="action_delreminder">DeleteReminder</string>
+    <string name="empty">No items.</string>
+
+    <string name="datetime_reminder">DateTimeReminder</string>
+    <string name="location_reminder">LocationReminder</string>
+    <string name="delete">Delete</string>
+    <string name="reminder_hint">Enter a reminder...</string>
+    <string name="title_hint">Title</string>
+
+</resources>
