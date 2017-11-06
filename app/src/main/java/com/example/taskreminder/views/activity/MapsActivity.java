@@ -11,6 +11,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.ArrayAdapter;
 import android.widget.Toast;
@@ -67,63 +68,63 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
                     " Unable to create maps!", Toast.LENGTH_SHORT)
                     .show();
         } else {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO:
-                return;
+            LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+            boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+            boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+            String provider_info = "";
+            if (isGPSEnabled) {
+                System.out.println("Gps is Enable");
+                provider_info = LocationManager.GPS_PROVIDER;
+
+            } else if (isNetworkEnabled) { // Try to get location if you Network Service is enabled
+                System.out.println("Network Is Enable");
+                provider_info = LocationManager.NETWORK_PROVIDER;
             }
-            googleMap.setMyLocationEnabled(true);
-            googleMap.setOnMapLongClickListener(this);
-            googleMap.setOnMarkerClickListener(this);
+
+            // Application can use GPS or Network Provider
+            if (!provider_info.isEmpty()) {
+                if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+                        ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+                    //if permission is not granted, get permission
+                    ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION, android.Manifest.permission.ACCESS_COARSE_LOCATION}, 1);
+
+                } else {
+                    //if permission is granted set location at the current location as soon as app opens
+                    locationManager.requestLocationUpdates(provider_info,
+                            MIN_TIME_BW_UPDATES,
+                            MIN_DISTANCE_CHANGE_FOR_UPDATES,
+                            this);
+
+                    Location location;
+                    if (locationManager != null) {
+                        System.out.println("Provider Infos " + provider_info);
+                        location = locationManager.getLastKnownLocation(provider_info);
+                        System.out.println("Location " + location);
+                        if (location != null) {
+                            onLocationChanged(location);
+                        } else {
+                            provider_info = LocationManager.NETWORK_PROVIDER;
+                            location = locationManager.getLastKnownLocation(provider_info);
+                            System.out.println("Location " + location);
+                            if (location != null) {
+                                onLocationChanged(location);
+                            }
+                        }
+                    }
+                }
+                googleMap.setMyLocationEnabled(true);
+                googleMap.setOnMapLongClickListener(this);
+                googleMap.setOnMarkerClickListener(this);
+            }
         }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-        boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
 
-        boolean isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-        String provider_info = "";
-        if (isGPSEnabled) {
-            System.out.println("Gps is Enable");
-            provider_info = LocationManager.GPS_PROVIDER;
-
-        } else if (isNetworkEnabled) { // Try to get location if you Network Service is enabled
-            System.out.println("Network Is Enable");
-            provider_info = LocationManager.NETWORK_PROVIDER;
-
-        }
-
-        // Application can use GPS or Network Provider
-        if (!provider_info.isEmpty()) {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                // TODO
-                return;
-            }
-            locationManager.requestLocationUpdates(
-                    provider_info,
-                    MIN_TIME_BW_UPDATES,
-                    MIN_DISTANCE_CHANGE_FOR_UPDATES,
-                    this
-            );
-            Location location;
-            if (locationManager != null) {
-                System.out.println("Provider Infos " + provider_info);
-                location = locationManager.getLastKnownLocation(provider_info);
-                System.out.println("Location " + location);
-                if (location != null) {
-                    onLocationChanged(location);
-                } else {
-                    provider_info = LocationManager.NETWORK_PROVIDER;
-                    location = locationManager.getLastKnownLocation(provider_info);
-                    System.out.println("Location " + location);
-                    if (location != null) {
-                        onLocationChanged(location);
-                    }
-                }
-            }
-        }
 
     }
 
@@ -149,11 +150,8 @@ public class MapsActivity extends AppCompatActivity implements LocationListener,
     }
 
     public void createMarker(LatLng latLng) {
-//        googleMap.clear();
-
         if (googleMap != null) {
             googleMap.addMarker(new MarkerOptions().position(latLng).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_YELLOW)));
-
 
             CameraPosition cameraPosition = new CameraPosition.Builder().target(
                     latLng).zoom(15).build();
